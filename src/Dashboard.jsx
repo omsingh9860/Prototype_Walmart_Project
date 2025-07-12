@@ -375,9 +375,9 @@ const returnReasons = [
                           color: '#F9FAFB'
                         }} 
                       />
-                      <Line type="monotone" dataKey="orders" stroke="#3B82F6" strokeWidth={3} animationDuration={13000000}  />
-                      <Line type="monotone" dataKey="returns" stroke="#EF4444" strokeWidth={2} animationDuration={13000000} />
-                      <Line type="monotone" dataKey="cancellations" stroke="#F59E0B" strokeWidth={2} animationDuration={13000000} />
+                      <Line type="monotone" dataKey="orders" stroke="#3B82F6" strokeWidth={3} animationDuration={10}  />
+                      <Line type="monotone" dataKey="returns" stroke="#EF4444" strokeWidth={2} animationDuration={10} />
+                      <Line type="monotone" dataKey="cancellations" stroke="#F59E0B" strokeWidth={2} animationDuration={10} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
