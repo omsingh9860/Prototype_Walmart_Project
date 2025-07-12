@@ -5,6 +5,14 @@ import { events } from './data/data';
 import EventCard from './components/EventCard'; 
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'];
+const orderData = {
+  totalOrders: 24567,
+  returnedOrders: 1234,
+  cancelledOrders: 567,
+  orderGrowth: 8.5,
+  returnRate: 5.02,
+  cancelRate: 2.31
+};
 
 // Sample data structure matching your format
 
@@ -17,6 +25,58 @@ export default function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [notifications, setNotifications] = useState(3);
   const [darkMode, setDarkMode] = useState(true);
+
+const returnReasons = [
+              { name: 'Defective Product', value: 35, color: '#EF4444' },
+              { name: 'Wrong Size/Color', value: 28, color: '#F59E0B' },
+              { name: 'Damaged in Transit', value: 18, color: '#8B5CF6' },
+              { name: 'Not as Described', value: 12, color: '#10B981' },
+              { name: 'Changed Mind', value: 7, color: '#06B6D4' },
+            ];
+
+            const topReturnedProducts = [
+              { name: 'Great Value Wireless Earbuds', returns: 245, cancellations: 89, aiPrediction: 'High Risk' },
+              { name: 'Mainstays Bedsheet Set', returns: 198, cancellations: 134, aiPrediction: 'Medium Risk' },
+              { name: 'Equate Vitamin D3', returns: 156, cancellations: 67, aiPrediction: 'Low Risk' },
+              { name: 'Better Homes Garden Lamp', returns: 134, cancellations: 198, aiPrediction: 'High Risk' },
+              { name: 'Great Value Protein Powder', returns: 123, cancellations: 45, aiPrediction: 'Low Risk' }
+            ];
+
+            const weeklyOrderTrends = [
+              { week: 'Week 1', orders: 5200, returns: 260, cancellations: 104 },
+              { week: 'Week 2', orders: 5450, returns: 272, cancellations: 109 },
+              { week: 'Week 3', orders: 5678, returns: 284, cancellations: 125 },
+              { week: 'Week 4', orders: 5890, returns: 295, cancellations: 118 },
+              { week: 'Week 5', orders: 6100, returns: 305, cancellations: 122 },
+              { week: 'Week 6', orders: 6234, returns: 312, cancellations: 137 }
+            ];
+
+            const aiPredictions = [
+              { 
+                product: 'Great Value Organic Honey', 
+                orderVolume: 1200, 
+                predictedReturns: 84, 
+                predictedCancellations: 36,
+                confidence: 89,
+                reason: 'Seasonal demand decline + quality concerns'
+              },
+              { 
+                product: 'Mainstays Coffee Maker', 
+                orderVolume: 890, 
+                predictedReturns: 125, 
+                predictedCancellations: 67,
+                confidence: 92,
+                reason: 'High return rate pattern + defect reports'
+              },
+              { 
+                product: 'Equate Hand Sanitizer', 
+                orderVolume: 2100, 
+                predictedReturns: 42, 
+                predictedCancellations: 21,
+                confidence: 85,
+                reason: 'Low risk based on historical data'
+              }
+            ];
 
   const selectedEvent = events.find(ev => ev.id === selectedEventId);
 
@@ -193,6 +253,213 @@ export default function Dashboard() {
                 <div className="mt-4 flex items-center">
                   <Eye className="w-4 h-4 text-orange-300 mr-1" />
                   <span className="text-orange-300 text-sm">Real-time monitoring</span>
+                </div>
+              </div>
+            </div>
+
+                        
+            
+        
+            {/* Order Analytics Dashboard */}
+            <div><h2 className="w-15 h-5 mr-2 text-purple-400" >Order Return and Cancellations</h2></div>
+            <div className="mt-8 space-y-6">
+              {/* Order Overview Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 p-6 rounded-xl shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-indigo-100 text-sm">Total Orders</p>
+                      <p className="text-2xl font-bold text-white">{orderData.totalOrders.toLocaleString()}</p>
+                    </div>
+                    <Package className="w-8 h-8 text-indigo-200" />
+                  </div>
+                  <div className="mt-4 flex items-center">
+                    <TrendingUp className="w-4 h-4 text-green-300 mr-1" />
+                    <span className="text-green-300 text-sm">+{orderData.orderGrowth}% this month</span>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-red-600 to-red-700 p-6 rounded-xl shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-red-100 text-sm">Returned Orders</p>
+                      <p className="text-2xl font-bold text-white">{orderData.returnedOrders.toLocaleString()}</p>
+                    </div>
+                    <RefreshCw className="w-8 h-8 text-red-200" />
+                  </div>
+                  <div className="mt-4 flex items-center">
+                    <AlertTriangle className="w-4 h-4 text-yellow-300 mr-1" />
+                    <span className="text-yellow-300 text-sm">{orderData.returnRate}% return rate</span>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-orange-600 to-orange-700 p-6 rounded-xl shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-orange-100 text-sm">Cancelled Orders</p>
+                      <p className="text-2xl font-bold text-white">{orderData.cancelledOrders.toLocaleString()}</p>
+                    </div>
+                    <AlertTriangle className="w-8 h-8 text-orange-200" />
+                  </div>
+                  <div className="mt-4 flex items-center">
+                    <Shield className="w-4 h-4 text-orange-300 mr-1" />
+                    <span className="text-orange-300 text-sm">{orderData.cancelRate}% cancel rate</span>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 p-6 rounded-xl shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-emerald-100 text-sm">Success Rate</p>
+                      <p className="text-2xl font-bold text-white">{(100 - orderData.returnRate - orderData.cancelRate).toFixed(1)}%</p>
+                    </div>
+                    <CheckCircle className="w-8 h-8 text-emerald-200" />
+                  </div>
+                  <div className="mt-4 flex items-center">
+                    <Star className="w-4 h-4 text-emerald-300 mr-1" />
+                    <span className="text-emerald-300 text-sm">Above target</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Charts Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Return Reasons Chart */}
+                <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                  <h3 className="font-bold text-lg mb-4 flex items-center">
+                    <RefreshCw className="w-5 h-5 mr-2 text-red-400" />
+                    Return Reasons Analysis
+                  </h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={returnReasons}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={100}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {returnReasons.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB'
+                        }} 
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Weekly Trends */}
+                <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                  <h3 className="font-bold text-lg mb-4 flex items-center">
+                    <TrendingUp className="w-5 h-5 mr-2 text-blue-400" />
+                    Weekly Order Trends
+                  </h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={weeklyOrderTrends}>
+                      <XAxis dataKey="week" tick={{ fill: '#9CA3AF', fontSize: 12 }} />
+                      <YAxis tick={{ fill: '#9CA3AF', fontSize: 12 }} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB'
+                        }} 
+                      />
+                      <Line type="monotone" dataKey="orders" stroke="#3B82F6" strokeWidth={3} animationDuration={13000000}  />
+                      <Line type="monotone" dataKey="returns" stroke="#EF4444" strokeWidth={2} animationDuration={13000000} />
+                      <Line type="monotone" dataKey="cancellations" stroke="#F59E0B" strokeWidth={2} animationDuration={13000000} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* AI Predictions Section */}
+              <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                <h3 className="font-bold text-lg mb-6 flex items-center">
+                  <Brain className="w-5 h-5 mr-2 text-purple-400" />
+                  AI Risk Predictions - Next 7 Days
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {aiPredictions.map((prediction, index) => (
+                    <div key={index} className="bg-gray-700 rounded-lg p-4 border border-gray-600">
+                      <div className="flex justify-between items-start mb-3">
+                        <h4 className="font-semibold text-white text-sm">{prediction.product}</h4>
+                        <div className={`px-2 py-1 rounded text-xs ${
+                          prediction.confidence >= 90 ? 'bg-green-500/20 text-green-400' :
+                          prediction.confidence >= 80 ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
+                          {prediction.confidence}% confidence
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-red-400">{prediction.predictedReturns}</div>
+                          <div className="text-xs text-gray-400">Predicted Returns</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-orange-400">{prediction.predictedCancellations}</div>
+                          <div className="text-xs text-gray-400">Predicted Cancellations</div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-xs text-gray-300 mb-2">
+                        <span className="font-medium">Order Volume:</span> {prediction.orderVolume.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-400 italic">
+                        {prediction.reason}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Top Returned Products Table */}
+              <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                <h3 className="font-bold text-lg mb-6 flex items-center">
+                  <AlertTriangle className="w-5 h-5 mr-2 text-yellow-400" />
+                  Top Returned Products This Month
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-600">
+                        <th className="text-left py-3 px-4 text-gray-300">Product</th>
+                        <th className="text-center py-3 px-4 text-gray-300">Returns</th>
+                        <th className="text-center py-3 px-4 text-gray-300">Cancellations</th>
+                        <th className="text-center py-3 px-4 text-gray-300">AI Risk Level</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {topReturnedProducts.map((product, index) => (
+                        <tr key={index} className="border-b border-gray-700 hover:bg-gray-700/50">
+                          <td className="py-3 px-4 text-white font-medium">{product.name}</td>
+                          <td className="text-center py-3 px-4 text-red-400">{product.returns}</td>
+                          <td className="text-center py-3 px-4 text-orange-400">{product.cancellations}</td>
+                          <td className="text-center py-3 px-4">
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              product.aiPrediction === 'High Risk' ? 'bg-red-500/20 text-red-400' :
+                              product.aiPrediction === 'Medium Risk' ? 'bg-yellow-500/20 text-yellow-400' :
+                              'bg-green-500/20 text-green-400'
+                            }`}>
+                              {product.aiPrediction}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
