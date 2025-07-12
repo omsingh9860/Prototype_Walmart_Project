@@ -347,10 +347,10 @@ const returnReasons = [
                       </Pie>
                       <Tooltip 
                         contentStyle={{ 
-                          backgroundColor: '#1F2937', 
+                          backgroundColor: '#FFFFFF', 
                           border: '1px solid #374151',
                           borderRadius: '8px',
-                          color: '#F9FAFB'
+                          color: '#FFFFFF'
                         }} 
                       />
                     </PieChart>
@@ -527,7 +527,7 @@ const returnReasons = [
                             backgroundColor: '#1F2937',
                             border: '1px solid #374151',
                             borderRadius: '8px',
-                            color: '#F9FAFB'
+                            color: '#FFFFFF'
                           }} 
                           labelStyle={{ color: '#F9FAFB' }} 
                           itemStyle={{ color: '#F9FAFB' }}
@@ -695,7 +695,7 @@ const returnReasons = [
                           backgroundColor: '#1F2937', 
                           border: '1px solid #374151',
                           borderRadius: '8px',
-                          color: '#F9FAFB'
+                          color: '#FFFFFF'
                         }} 
                       />
                     </PieChart>
