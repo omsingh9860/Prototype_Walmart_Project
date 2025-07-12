@@ -1,0 +1,444 @@
+import React, { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, AreaChart, Area } from 'recharts';
+import { Clock, Download, MapPin, ArrowLeft, Bell, TrendingUp, AlertTriangle, CheckCircle, Zap, Target, Brain, DollarSign, Package, Users, Star, Filter, Search, RefreshCw, Activity, Shield, Eye } from 'lucide-react';
+import { events } from './data/data';
+import EventCard from './components/EventCard'; 
+
+const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'];
+
+// Sample data structure matching your format
+
+
+export default function Dashboard() {
+  const [selectedEventId, setSelectedEventId] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [notifications, setNotifications] = useState(3);
+  const [darkMode, setDarkMode] = useState(true);
+
+  const selectedEvent = events.find(ev => ev.id === selectedEventId);
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Calculate combined metrics
+  const combinedDemandShift = events.reduce((acc, ev) => {
+    Object.entries(ev.business_impact.demand_shift).forEach(([key, value]) => {
+      acc[key] = (acc[key] || 0) + value;
+    });
+    return acc;
+  }, {});
+
+  const totalRevenueSaved = events.reduce((acc, ev) => acc + ev.business_impact.revenue_loss_avoided, 0);
+  const totalStockoutsPrevented = events.reduce((acc, ev) => acc + ev.business_impact.stockout_prevented, 0);
+  const avgUrgencyScore = events.reduce((acc, ev) => acc + ev.business_impact.urgency_score, 0) / events.length;
+
+  // Filter events
+  const filteredEvents = events.filter(event => {
+    const matchesSearch = event.event.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         event.region.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterType === 'all' || event.event_type === filterType;
+    return matchesSearch && matchesFilter;
+  });
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => setIsRefreshing(false), 1500);
+  };
+
+  const getUrgencyColor = (score) => {
+    if (score >= 8) return 'text-red-400';
+    if (score >= 6) return 'text-yellow-400';
+    return 'text-green-400';
+  };
+
+  const getUrgencyBg = (score) => {
+    if (score >= 8) return 'bg-red-500/20 border-red-500/30';
+    if (score >= 6) return 'bg-yellow-500/20 border-yellow-500/30';
+    return 'bg-green-500/20 border-green-500/30';
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white transition-all duration-300">
+      {/* Header */}
+      <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Brain className="w-8 h-8 text-blue-400 animate-pulse" />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Walmart AI Regional Inventory Dashboard
+              </h1>
+            </div>
+            <div className="flex items-center space-x-2 text-sm bg-gray-700 px-3 py-1 rounded-full">
+              <Activity className="w-4 h-4 text-green-400" />
+              <span className="text-green-400">Live</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 text-sm text-gray-300">
+              <Clock className="w-4 h-4" />
+              <span className="font-mono">{currentTime.toLocaleTimeString()}</span>
+            </div>
+            <div className="relative">
+              <Bell className="w-5 h-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+              {notifications > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-bounce">
+                  {notifications}
+                </span>
+              )}
+            </div>
+            <button 
+              onClick={handleRefresh}
+              className={`p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors ${isRefreshing ? 'animate-spin' : ''}`}
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+              <Download className="w-4 h-4" />
+              <span>Export</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6">
+        {selectedEventId === null ? (
+          <>
+            {/* Search and Filter Bar */}
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search events or regions..."
+                  className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Filter className="w-4 h-4 text-gray-400" />
+                <select
+                  className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                >
+                  <option value="all">All Events</option>
+                  <option value="Weather Alert">Weather Alerts</option>
+                  <option value="Sports Event">Sports Events</option>
+                  <option value="Festival">Festivals</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Key Metrics Dashboard */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-xl shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-100 text-sm">Total Revenue Saved</p>
+                    <p className="text-2xl font-bold text-white">₹{(totalRevenueSaved / 1000000).toFixed(1)}M</p>
+                  </div>
+                  <DollarSign className="w-8 h-8 text-blue-200" />
+                </div>
+                <div className="mt-4 flex items-center">
+                  <TrendingUp className="w-4 h-4 text-green-300 mr-1" />
+                  <span className="text-green-300 text-sm">+12.5% from last week</span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-600 to-green-700 p-6 rounded-xl shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-green-100 text-sm">Stockouts Prevented</p>
+                    <p className="text-2xl font-bold text-white">{totalStockoutsPrevented}</p>
+                  </div>
+                  <Package className="w-8 h-8 text-green-200" />
+                </div>
+                <div className="mt-4 flex items-center">
+                  <CheckCircle className="w-4 h-4 text-green-300 mr-1" />
+                  <span className="text-green-300 text-sm">98% accuracy rate</span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-600 to-purple-700 p-6 rounded-xl shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-purple-100 text-sm">Avg Urgency Score</p>
+                    <p className="text-2xl font-bold text-white">{avgUrgencyScore.toFixed(1)}/10</p>
+                  </div>
+                  <Zap className="w-8 h-8 text-purple-200" />
+                </div>
+                <div className="mt-4 flex items-center">
+                  <AlertTriangle className="w-4 h-4 text-yellow-300 mr-1" />
+                  <span className="text-yellow-300 text-sm">High priority alerts</span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-orange-600 to-orange-700 p-6 rounded-xl shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-orange-100 text-sm">Active Events</p>
+                    <p className="text-2xl font-bold text-white">{events.length}</p>
+                  </div>
+                  <Activity className="w-8 h-8 text-orange-200" />
+                </div>
+                <div className="mt-4 flex items-center">
+                  <Eye className="w-4 h-4 text-orange-300 mr-1" />
+                  <span className="text-orange-300 text-sm">Real-time monitoring</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {filteredEvents.map(event => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onViewDetails={() => setSelectedEventId(event.id)}
+                  onShare={(ev) => console.log("Share clicked", ev)}
+                  onBookmark={(ev) => console.log("Bookmark clicked", ev)}
+                  isBookmarked={false} // or pass actual bookmark state
+                />
+              ))}
+            </div>
+
+
+            {/* Combined Analytics */}
+            <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+              <h3 className="font-bold text-xl mb-6 flex items-center">
+                <Target className="w-6 h-6 mr-2 text-blue-400" />
+                Combined Analytics Dashboard
+              </h3>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                  <h4 className="font-semibold text-lg mb-4 text-gray-300">Demand Shift Forecast</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={Object.entries(combinedDemandShift).map(([name, value]) => ({ name, value }))}>
+                      <XAxis dataKey="name" tick={{ fill: '#9CA3AF', fontSize: 12 }} />
+                      <YAxis tick={{ fill: '#9CA3AF', fontSize: 12 }} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB'
+                        }} 
+                      />
+                      <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-lg mb-4 text-gray-300">Product Category Distribution</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={Object.entries(combinedDemandShift).map(([name, value]) => ({ name, value }))}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={100}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {Object.entries(combinedDemandShift).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1F2937',
+                            border: '1px solid #374151',
+                            borderRadius: '8px',
+                            color: '#F9FAFB'
+                          }} 
+                          labelStyle={{ color: '#F9FAFB' }} 
+                          itemStyle={{ color: '#F9FAFB' }}
+                        />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Back Button */}
+            <button 
+              onClick={() => setSelectedEventId(null)} 
+              className="mb-6 flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Dashboard</span>
+            </button>
+
+            {/* Event Details */}
+            <div className="space-y-6">
+              {/* Event Header */}
+              <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white mb-2">{selectedEvent.event}</h2>
+                    <p className="text-gray-400 mb-4">{selectedEvent.gpt_output.quick_reason}</p>
+                    <p className="text-gray-300">{selectedEvent.gpt_output.strategy}</p>
+                  </div>
+                  <div className={`px-4 py-2 rounded-lg border ${getUrgencyBg(selectedEvent.business_impact.urgency_score)}`}>
+                    <div className="text-center">
+                      <div className="text-sm text-gray-400">Urgency</div>
+                      <div className={`text-2xl font-bold ${getUrgencyColor(selectedEvent.business_impact.urgency_score)}`}>
+                        {selectedEvent.business_impact.urgency_score}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-green-400 mb-2">✅ Stock Up</h4>
+                    <div className="space-y-2">
+                      {selectedEvent.gpt_output.stock_up.map((item, index) => (
+                        <div key={index} className="bg-green-500/10 text-green-400 px-3 py-1 rounded-full text-sm inline-block mr-2">
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-red-400 mb-2">❌ Avoid</h4>
+                    <div className="space-y-2">
+                      {selectedEvent.gpt_output.avoid.map((item, index) => (
+                        <div key={index} className="bg-red-500/10 text-red-400 px-3 py-1 rounded-full text-sm inline-block mr-2">
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Region & Weather Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                  <h3 className="font-bold text-lg mb-4 flex items-center">
+                    <MapPin className="w-5 h-5 mr-2 text-blue-400" />
+                    Region Information
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-gray-400">Location:</span>
+                      <span className="text-white ml-2">{selectedEvent.region}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Weather:</span>
+                      <span className="text-white ml-2">{selectedEvent.weather.condition}, {selectedEvent.weather.temperature}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Forecast:</span>
+                      <span className="text-white ml-2">{selectedEvent.weather.forecast}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Walmart Presence:</span>
+                      <span className="text-white ml-2">{selectedEvent.region_info.walmart_presence}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Top Categories:</span>
+                      <span className="text-white ml-2">{selectedEvent.region_info.top_categories.join(', ')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                  <h3 className="font-bold text-lg mb-4 flex items-center">
+                    <DollarSign className="w-5 h-5 mr-2 text-green-400" />
+                    Business Impact
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-white">{selectedEvent.business_impact.stockout_prevented}</div>
+                      <div className="text-sm text-gray-400">Stockouts Prevented</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-400">₹{(selectedEvent.business_impact.revenue_loss_avoided / 1000).toFixed(0)}K</div>
+                      <div className="text-sm text-gray-400">Revenue Saved</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-400">{selectedEvent.business_impact.projected_growth_percent}%</div>
+                      <div className="text-sm text-gray-400">Growth Forecast</div>
+                    </div>
+                    <div className="text-center">
+                      <div className={`text-2xl font-bold ${getUrgencyColor(selectedEvent.business_impact.urgency_score)}`}>
+                        {selectedEvent.business_impact.urgency_score}/10
+                      </div>
+                      <div className="text-sm text-gray-400">Urgency Score</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                  <h3 className="font-bold text-lg mb-4">Demand Shift Analysis</h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={Object.entries(selectedEvent.business_impact.demand_shift).map(([name, value]) => ({ name, value }))}>
+                      <XAxis dataKey="name" tick={{ fill: '#9CA3AF', fontSize: 12 }} />
+                      <YAxis tick={{ fill: '#9CA3AF', fontSize: 12 }} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB'
+                        }} 
+                      />
+                      <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+                  <h3 className="font-bold text-lg mb-4">Product Focus Distribution</h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={Object.entries(selectedEvent.business_impact.demand_shift).map(([name, value]) => ({ name, value }))}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={100}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {Object.entries(selectedEvent.business_impact.demand_shift).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB'
+                        }} 
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
